@@ -19,3 +19,5 @@ class Net(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x)
 
+# convolutions https://setosa.io/ev/image-kernels/
+
