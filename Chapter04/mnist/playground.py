@@ -49,18 +49,18 @@ def fit(epoch, model, data_loader, optimizer, phase='training', volatile=False):
             loss.backward()
             optimizer.step()
 
-        loss = running_loss/len(data_loader.dataset)
-        accuracy = 100. * running_correct/len(data_loader.dataset)
+    loss = running_loss/len(data_loader.dataset)
+    accuracy = 100. * running_correct/len(data_loader.dataset)
 
-        print(f'{phase} loss is {loss:{5}.{2}} and {phase} accuracy is {running_correct}/{len(data_loader.dataset)}{accuracy:{10}.{4}}')
-        return loss, accuracy
+    print(f'{phase} loss is {loss:{5}.{2}} and {phase} accuracy is {running_correct}/{len(data_loader.dataset)}{accuracy:{10}.{4}}')
+    return loss, accuracy
 
 
 _model = networks.Net()
 if is_cuda:
     _model.cuda()
 
-_optimizer = optim.SGD(_model.parameters(), lr=0.01, momentum=0.5)
+_optimizer = optim.SGD(_model.parameters(), lr=0.01)
 train_losses, train_accuracy = [], []
 val_losses, val_accuracy = [], []
 for epoch in range(1, 150):
