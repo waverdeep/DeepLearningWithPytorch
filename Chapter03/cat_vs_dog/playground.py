@@ -70,8 +70,8 @@ valid = ImageFolder('../../datasets/dogs-vs-cats/valid/', simple_transform)
 imshow(train[50][0])
 
 # 3. 배치 처리하기
-train_data_gen = DataLoader(train, batch_size=64, num_workers=8)
-valid_data_gen = DataLoader(valid, batch_size=64, num_workers=8)
+train_data_gen = DataLoader(train, batch_size=128, num_workers=8)
+valid_data_gen = DataLoader(valid, batch_size=128, num_workers=8)
 dataloaders = {'train':train_data_gen,'valid':valid_data_gen}
 dataset_sizes = {'train':len(train_data_gen.dataset),'valid':len(valid_data_gen.dataset)}
 
@@ -106,8 +106,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         # 까 에폭은 학습과 검증 단계로 구성
         for phase in ['train', 'valid']:
             if phase == 'train':
+                model.train(True)  # 학습 모드로 모델 선정
                 scheduler.step()
-                model.train(True) # 학습 모드로 모델 선정
             else:
                 model.train(False)
 
@@ -160,4 +160,4 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     model.load_state_dict(best_model_wts)
     return model
 
-model_ft = train_model(model_ft, _criterion, optimizer_ft, exp_lr_scheduler, num_epochs=24)
+model_ft = train_model(model_ft, _criterion, optimizer_ft, exp_lr_scheduler, num_epochs=100)
