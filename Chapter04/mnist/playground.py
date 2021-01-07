@@ -5,6 +5,7 @@ import torch.optim as optim
 from torchvision import datasets,transforms
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
+import Chapter04.mnist.networks as networks
 
 # cuda 사용 가능 확인
 is_cuda=False
@@ -33,7 +34,7 @@ def fit(epoch, model, data_loader, optimizer, phase='training', volatile=False):
 
     for batch_idx, (data, target) in enumerate(data_loader):
         if is_cuda:
-            data, target = data.cuda(), target.cudea()
+            data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile), Variable(target)
 
         if phase == 'training':
@@ -41,7 +42,7 @@ def fit(epoch, model, data_loader, optimizer, phase='training', volatile=False):
         output = model(data)
         loss = F.nll_loss(output, target) # 손실 함수
 
-        running_loss += F.nll_loss(output, target, size_average=False).data[0]
+        running_loss += F.nll_loss(output, target, size_average=False).data
         preds = output.data.max(dim=1, keepdim=True)[1]
         running_correct += preds.eq(target.data.view_as(preds)).cpu().sum()
         if phase == 'training':
@@ -53,3 +54,29 @@ def fit(epoch, model, data_loader, optimizer, phase='training', volatile=False):
 
         print(f'{phase} loss is {loss:{5}.{2}} and {phase} accuracy is {running_correct}/{len(data_loader.dataset)}{accuracy:{10}.{4}}')
         return loss, accuracy
+
+
+_model = networks.Net()
+if is_cuda:
+    _model.cuda()
+
+_optimizer = optim.SGD(_model.parameters(), lr=0.01, momentum=0.5)
+train_losses, train_accuracy = [], []
+val_losses, val_accuracy = [], []
+for epoch in range(1, 150):
+    epoch_loss, epoch_accuracy = fit(epoch, _model, data_loader=train_loader, optimizer=_optimizer, phase='training')
+    val_epoch_loss, val_epoch_accuracy = fit(epoch, _model, test_loader, _optimizer, phase='validation')
+    train_losses.append(epoch_loss)
+    train_accuracy.append(epoch_accuracy)
+    val_losses.append(val_epoch_loss)
+    val_accuracy.append(val_epoch_accuracy)
+
+plt.plot(range(1,len(train_losses)+1),train_losses,'bo',label = 'training loss')
+plt.plot(range(1,len(val_losses)+1),val_losses,'r',label = 'validation loss')
+plt.legend()
+plt.show()
+
+plt.plot(range(1,len(train_accuracy)+1),train_accuracy,'bo',label = 'train accuracy')
+plt.plot(range(1,len(val_accuracy)+1),val_accuracy,'r',label = 'val accuracy')
+plt.legend()
+plt.show()
