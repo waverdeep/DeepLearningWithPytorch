@@ -1,26 +1,30 @@
-import torch
-import torch.nn as nn
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
+import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets,transforms
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
-import Chapter04.mnist.networks as networks
+import Chapter05.cat_vs_dog.networks as networks
+import torch
 
 # cuda 사용 가능 확인
 is_cuda=False
 if torch.cuda.is_available():
     is_cuda = True
 
-# 데이터 불러오기
-transformation = transforms.Compose([transforms.ToTensor(), # 텐서 형태로 변경
-                                     transforms.Normalize((0.1307,), (0.3081,))]) # normalization 진행
+# transform : 데이터 변환
+simple_transform = transforms.Compose([transforms.Resize((224,224)), # 이미지 사이즈 조절
+                                       transforms.ToTensor(), # 파이토치 텐서로 변화
+                                       transforms.Normalize([0.485, 0.456, 0.406],
+                                                            [0.229, 0.224, 0.225])]) # 정규화
 
-train_dataset = datasets.MNIST('data/', train=True, transform=transformation, download=True)
-test_dataset = datasets.MNIST('data/', train=False, transform=transformation, download=True)
+train = ImageFolder('../../datasets/dogs-vs-cats/train/', simple_transform)
+valid = ImageFolder('../../datasets/dogs-vs-cats/valid/', simple_transform)
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True)
+# 3. 배치 처리하기
+train_data_gen = DataLoader(train, batch_size=16, num_workers=8, shuffle=True)
+valid_data_gen = DataLoader(valid, batch_size=16, num_workers=8, shuffle=True)
 
 # 모델 학습 함수 만들기
 def fit(epoch, model, data_loader, optimizer, phase='training', volatile=False):
@@ -60,12 +64,12 @@ _model = networks.Net()
 if is_cuda:
     _model.cuda()
 
-_optimizer = optim.SGD(_model.parameters(), lr=0.01)
+_optimizer = optim.SGD(_model.parameters(), lr=0.01, momentum=0.1)
 train_losses, train_accuracy = [], []
 val_losses, val_accuracy = [], []
-for epoch in range(1, 150):
-    epoch_loss, epoch_accuracy = fit(epoch, _model, data_loader=train_loader, optimizer=_optimizer, phase='training')
-    val_epoch_loss, val_epoch_accuracy = fit(epoch, _model, test_loader, _optimizer, phase='validation')
+for epoch in range(1, 100):
+    epoch_loss, epoch_accuracy = fit(epoch, _model, data_loader=train_data_gen, optimizer=_optimizer, phase='training')
+    val_epoch_loss, val_epoch_accuracy = fit(epoch, _model, valid_data_gen, _optimizer, phase='validation')
     train_losses.append(epoch_loss)
     train_accuracy.append(epoch_accuracy)
     val_losses.append(val_epoch_loss)
