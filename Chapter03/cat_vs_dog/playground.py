@@ -89,7 +89,7 @@ if is_cuda:
 # 5. 오차함수와 옵티마이저 설정
 learning_rate = 0.001
 _criterion = nn.CrossEntropyLoss() # 오차함수
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9) # 옵티마이저
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001) # 옵티마이저
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1) # 학습률을 동적으로 변경
 
 # 6. 모델 학습
