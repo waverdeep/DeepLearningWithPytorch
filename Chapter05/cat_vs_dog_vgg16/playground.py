@@ -20,8 +20,20 @@ simple_transform = transforms.Compose([transforms.Resize((224,224)), # 이미지
                                        transforms.Normalize([0.485, 0.456, 0.406],
                                                             [0.229, 0.224, 0.225])]) # 정규화
 
-train = ImageFolder('../../datasets/dogs-vs-cats/train/', simple_transform)
+# train = ImageFolder('../../datasets/dogs-vs-cats/train/', simple_transform)
 valid = ImageFolder('../../datasets/dogs-vs-cats/valid/', simple_transform)
+
+# 데이터 어구먼테이션을 위한 transformation 변경
+train_transform = transforms.Compose([transforms.Resize((224, 224)),
+                                      transforms.RandomHorizontalFlip(),
+                                      transforms.RandomRotation(0.2),
+                                      transforms.ToTensor(),
+                                      transforms.Normalize([0.485, 0.456, 0.406],
+                                                           [0.229, 0.224, 0.225])
+                                      ])
+
+train = ImageFolder('../../datasets/dogs-vs-cats/train/', train_transform)
+
 
 # 3. 배치 처리하기
 train_data_loader = DataLoader(train, batch_size=16, num_workers=8, shuffle=True)
