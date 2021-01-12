@@ -7,6 +7,7 @@ from torchvision import models
 import torch
 from torch import optim
 import torch.nn.functional as F
+import torch.nn as nn
 
 # cuda 사용 가능 확인
 is_cuda = False
@@ -39,6 +40,14 @@ for param in vgg.features.parameters():
 vgg.classifier[6].out_features = 2
 
 optimizer = optim.SGD(vgg.classifier.parameters(), lr=0.0001, momentum=0.2)
+
+#---------------#
+# VGG 의 Classifier 모듈의 드롭아웃 값을 0.5에서 0.2로 변경하는 코드
+#---------------#
+for layer in vgg.classifier.children():
+    if(type(layer) == nn.Dropout):
+        layer.p = 0.2
+#---------------#
 
 
 def fit(epoch, model, data_loader, phase='training', volatile=False):
